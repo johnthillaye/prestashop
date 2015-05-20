@@ -1,18 +1,31 @@
-var TwitterBot = require("node-twitterbot").TwitterBot
+var Twit = require("twit")
 
-var Bot = new TwitterBot({
-    "consumer_secret": "consumer_secret",
-    "consumer_key": "consumer_key",
-    "access_token": "access_token",
-    "access_token_secret": "access_token_secret"
+var T = new Twit({
+    consumer_secret: "",
+    consumer_key: "",
+    access_token: "",
+    access_token_secret: ""
 });
 
-Bot.addAction("isHavingTrouble", function (twitter, action, tweet) {
-	Bot.tweet("Hey ! Need any help witht that ?");
-}) 
 
-Bot.listen("listening", function (tweet) {
-	console.log(tweet);
-	return false;
-}, isHavingTrouble);
+var havingTroubleStream = T.stream('statuses/filter', { track: 'prestashop not working', language: ['en', 'fr'] })
+var wantsPluginStream = T.stream('statuses/filter', { track: 'plugin prestashop ?'})
+var showsLoveStream = T.stream('statuses/filter', { track: 'prestashop is great'})
 
+havingTroubleStream.on('tweet', function (tweet) {
+  console.log(tweet)
+  //notify support, automated tweet etc
+})
+
+wantsPluginStream.on('tweet', function (tweet) {
+	console.log(tweet)
+	//analyze tweet for products features desirability, notify sales etc
+})
+
+showsLoveStream.on('tweet', function (tweet) {
+	console.log(tweet)
+	//retweet endorsement
+	T.post('statuses/retweet/:id', { id: tweet.id_str }, function (err, data, response) {
+	  console.log(data)
+	})
+})
